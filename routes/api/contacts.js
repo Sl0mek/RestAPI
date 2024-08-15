@@ -2,7 +2,6 @@ const express = require('express')
 const Joi = require('joi');
 const { listContacts, getContactById, addContact, removeContact, updateContact } = require("../../models/contacts");
 
-
 const router = express.Router()
 
 router.get('/', (req, res, next) => {
@@ -32,7 +31,6 @@ router.get('/:contactId', (req, res, next) => {
 })
 
 router.post('/', (req, res, next) => {
-  const { name, email, phone} = req.body;
   console.log(req.body);
 
   const schema = Joi.object({
@@ -50,7 +48,7 @@ router.post('/', (req, res, next) => {
 
   addContact(req.body)
   .then((contact) => {
-    if(Object.keys(contact).length > 0){
+    if(contact){
       res.status(201).json(contact);
     }else{
       res.status(404).json({

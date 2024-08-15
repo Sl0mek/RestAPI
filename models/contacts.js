@@ -106,7 +106,7 @@ const updateContact = (contactId, body) => {
             return contact;
           });
       } else {
-        return {}; 
+        return contact; 
       }
     })
     .catch(error => {
