@@ -7,6 +7,7 @@ const router = express.Router()
 router.get('/', (req, res, next) => {
   listContacts()
   .then((contacts) => {
+    console.log(contacts);
     res.json(contacts);
   })
   .catch((error) => {

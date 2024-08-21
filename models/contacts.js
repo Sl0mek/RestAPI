@@ -4,16 +4,31 @@ const path = require("node:path");
 const Joi = require('joi');
 
 const contactsPath = "./models/contacts.json";
+const Contact = require("../service/schema/contact.js");
+
+
+// const listContacts = () => {
+//   return fs.readFile(path.resolve(contactsPath), 'utf8')
+//     .then(file => {
+//       const contacts = JSON.parse(file);
+//       console.log(contacts);
+//       return contacts;
+//     })
+//     .catch(error => {
+//       console.error('Error reading contacts:', error);
+//       throw error;
+//     });
+// };
 
 const listContacts = () => {
-  return fs.readFile(path.resolve(contactsPath), 'utf8')
-    .then(file => {
-      const contacts = JSON.parse(file);
-      console.log(contacts);
+  console.log("a")
+  return Contact.find()
+    .then((contacts) => {
+      console.log("b")
       return contacts;
     })
-    .catch(error => {
-      console.error('Error reading contacts:', error);
+    .catch((error) => {
+      console.log("b")
       throw error;
     });
 };
