@@ -1,6 +1,6 @@
 const express = require('express')
 const Joi = require('joi');
-const { listContacts, getContactById, addContact, removeContact, updateContact } = require("../../models/contacts");
+const { listContacts, getContactById, addContact, removeContact, updateContact, updateStatusContact } = require("../../models/contacts");
 
 const router = express.Router()
 
@@ -19,6 +19,7 @@ router.get('/:contactId', (req, res, next) => {
   getContactById(req.params.contactId)
   .then((contact) => {
     if(contact){
+      console.log(contact);
       res.json(contact);
     }else{
       res.status(404).json({
@@ -37,7 +38,8 @@ router.post('/', (req, res, next) => {
   const schema = Joi.object({
     name: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
-    phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/).required()
+    phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/).required(),
+    favorite: Joi.bool().required()
   });
 
   const { error } = schema.validate(req.body);
@@ -83,7 +85,8 @@ router.put('/:contactId', (req, res, next) => {
     const schema = Joi.object({
       name: Joi.string().min(3).max(30),
       email: Joi.string().email(),
-      phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/)
+      phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/),
+      favorite: Joi.bool()
     });
   
     const { error } = schema.validate(req.body);
@@ -108,6 +111,39 @@ router.put('/:contactId', (req, res, next) => {
   } else {
     res.status(400).json({
       "message": "missing fields"
+    });
+  }
+})
+
+
+router.patch('/:contactId/favorite', (req, res, next) => {
+  if (req.body.favorite) {
+    const schema = Joi.object({
+      favorite: Joi.bool().required()
+    });
+  
+    const { error } = schema.validate(req.body);
+    if(error){
+      return res.status(400).json({
+        "error": error.details 
+      });
+    }
+    updateStatusContact(req.params.contactId, req.body)
+    .then((contact) => {
+      if(contact.length > 0){
+        res.status(200).json(contact);
+      }else{
+        res.status(404).json({
+          "message": "Not found"
+        })
+      }
+    })
+    .catch((error) => {
+      next(error);
+    });
+  } else {
+    res.status(400).json({
+      "message": "missing field favorite"
     });
   }
 })
