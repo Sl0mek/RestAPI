@@ -39,7 +39,7 @@ router.post('/', (req, res, next) => {
     name: Joi.string().min(3).max(30).required(),
     email: Joi.string().email().required(),
     phone: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/).required(),
-    favorite: Joi.bool().required()
+    favorite: Joi.bool()
   });
 
   const { error } = schema.validate(req.body);
@@ -119,7 +119,7 @@ router.put('/:contactId', (req, res, next) => {
 router.patch('/:contactId/favorite', (req, res, next) => {
   if (req.body.favorite) {
     const schema = Joi.object({
-      favorite: Joi.bool().required()
+      favorite: Joi.bool()
     });
   
     const { error } = schema.validate(req.body);

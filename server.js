@@ -1,9 +1,8 @@
-// import "dotenv/config";
+require('dotenv').config()
 const mongoose = require('mongoose');
 const app = require('./app')
 
-// const url = process.env.MONGODB_CONNECTION_STRING;
-const url = "mongodb+srv://sl0mek:.hLPQxWUH8_8nKk@basecluster.xomnj.mongodb.net/db-contacts";
+const url = process.env.MONGODB_CONNECTION_STRING;
 
 const server = async () => {
   try {

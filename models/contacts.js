@@ -118,7 +118,7 @@ const addContact = (body) => {
       name: body.name,
       email: body.email,
       phone: body.phone,
-      favorite: body.favorite
+      favorite: false
     })
     .then((contacts) => {
       return contacts;
