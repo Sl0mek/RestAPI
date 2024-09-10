@@ -22,8 +22,9 @@ const addUser = async (body) => {
   const { email, password } = body;
   const users = await User.find();
   const findUser = users.find((user) => user.email === email);
+  console.log(findUser);
   if (findUser) {
-    return `message: Email in use`;
+    return -1;
   }
   try {
     const salt = await bcrypt.genSalt();

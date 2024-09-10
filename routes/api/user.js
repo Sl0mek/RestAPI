@@ -1,6 +1,6 @@
 const express = require("express");
 const { addUser, getUserById, loginUser, userList } = require("../../models/users.js");
-const passport = require("../../config/config-passport.js").default;
+const passport = require("../../config/config-passport.js");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
@@ -102,11 +102,20 @@ userRouter.post("/signup", async (req, res, next) => {
   const { body } = req;
   try {
     const user = await addUser(body);
-    return res.status(201).json({
-      status: "success",
-      code: 201,
-      data: { user },
-    });
+
+    if(user === -1){
+      return res.status(409).json({
+        status: "conflict",
+        code: 409,
+        data: { message: 'Email in use' },
+      });
+    }else{
+      return res.status(201).json({
+        status: "success",
+        code: 201,
+        data: { user },
+      });
+    }
   } catch (err) {
     return res.status(400).json({ message: "Bad request" });
   }
