@@ -126,7 +126,11 @@ userRouter.post("/login", async (req, res, next) => {
   try {
     const user = await loginUser(body);
     if (!user) {
-      return res.status(400).json(`Email or password is wrong`);
+      return res.status(400).json({
+        status: "unauthorized",
+        code: 201,
+        data: { message: "Email or password is wrong" },
+      });
     }
     const payload = {
       id: user.id,
