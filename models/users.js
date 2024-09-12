@@ -1,6 +1,8 @@
 const { Error } = require("mongoose");
 const User = require("../service/schema/user.js");
 const bcrypt = require("bcrypt");
+const gravatar = require('gravatar');
+const { Jimp } = require("jimp");
 
 const userList = async () => {
   try {
@@ -29,7 +31,8 @@ const addUser = async (body) => {
   try {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = { ...body, password: hashedPassword };
+    const userAvatar = gravatar.url(email, { s: "250" });
+    const user = { ...body, password: hashedPassword, avatarURL: userAvatar };
     await User.create(user);
     return user;
   } catch (err) {
@@ -56,10 +59,31 @@ const loginUser = async (body) => {
   }
 };
 
+const pathAvatar = async (id, file) => {
+  try {
+    const localAvatar = `public\\avatars\\avatar_${id}.jpg`;
+    console.log(file.path);
+    console.log(localAvatar);
+    const image = await Jimp.read(file.path);
+    image.resize({w: 250, h: 250});
+    await image.write(localAvatar);
+
+    const user = await User.findByIdAndUpdate(
+      { _id: id },
+      { $set: { avatarURL: localAvatar } },
+      { new: true }
+    );
+    return user;
+  } catch (err) {
+    throw err;
+  }
+};
+
 module.exports = {
     userList,
     getUserById,
     addUser,
-    loginUser
+    loginUser,
+    pathAvatar
   }
   
