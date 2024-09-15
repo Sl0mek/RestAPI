@@ -3,6 +3,11 @@ const User = require("../service/schema/user.js");
 const bcrypt = require("bcrypt");
 const gravatar = require('gravatar');
 const { Jimp } = require("jimp");
+const { nanoid } = require("nanoid");
+require("dotenv").config();
+const sgMail = require("@sendgrid/mail");
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const userList = async () => {
   try {
@@ -32,8 +37,10 @@ const addUser = async (body) => {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
     const userAvatar = gravatar.url(email, { s: "250" });
-    const user = { ...body, password: hashedPassword, avatarURL: userAvatar };
+    const verificationToken = nanoid();
+    const user = { ...body, password: hashedPassword, avatarURL: userAvatar, verificationToken };
     await User.create(user);
+    await sgMail.send(verificationMgs(email, verificationToken));
     return user;
   } catch (err) {
     throw err;
@@ -79,11 +86,55 @@ const pathAvatar = async (id, file) => {
   }
 };
 
+const verificationMgs = (email, verificationToken) => {
+  return {
+    to: email, // Change to your recipient
+    from: "XXX@XXX", // Change to your verified sender
+    subject: "Verify your email",
+    text: "Verify your email in link bellow",
+    html: `<strong><a href="http://localhost:3000/api/users/verify/${verificationToken}">Verify email</a></strong>`,
+  };
+};
+
+const verificationEmail = async (email) => {
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error({ message: `User not found` });
+    }
+    const { verificationToken, verify } = user;
+    if (verify) {
+      throw new Error({ message: `Verification has already been passed` });
+    }
+    await sgMail.send(verificationMgs(email, verificationToken));
+  } catch (err) {
+    throw err;
+  }
+};
+
+const verificationUser = async (verificationToken) => {
+  try {
+    const user = await User.findOne({ verificationToken });
+    if (!user) {
+      throw new Error();
+    }
+    user.verify = true;
+    await user.save();
+    user.verificationToken = null;
+    return user;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
 module.exports = {
     userList,
     getUserById,
     addUser,
     loginUser,
-    pathAvatar
+    pathAvatar,
+    verificationEmail,
+    verificationUser
   }
   
